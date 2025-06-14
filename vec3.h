@@ -1,6 +1,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include "utils.h"
 #include <cmath>
 #include <iostream>
 
@@ -43,6 +44,19 @@ class vec3 {
 
     double length_squared() const {
         return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
+    }
+
+    bool near_zero() const {
+        double s = 1e-8;
+        return (std::fabs(e[0] < s)) && (std::fabs(e[1] < s)) && (std::fabs(e[2] < s));
+    }
+
+    static vec3 random() {
+        return vec3(random_double(), random_double(), random_double());
+    }
+
+    static vec3 random(double min, double max) {
+        return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
     }
 };
 
@@ -90,6 +104,21 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
+}
+
+inline vec3 random_unit_vector() {
+    while(true) {
+        auto p = vec3::random(-1, 1);
+        double lensq = p.length_squared();
+        if(1e-160 < lensq && lensq <= 1) {
+            return p / std::sqrt(lensq);
+        }
+    }
+}
+
+inline vec3 random_on_hemisphere(const vec3& normal) {
+    vec3 unit = random_unit_vector();
+    return (dot(unit, normal) > 0.0) ? unit : -unit;
 }
 
 #endif

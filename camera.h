@@ -3,13 +3,18 @@
 
 #include "hittable.h"
 #include "color.h"
+#include "material.h"
 
 class camera {
   public:
     double aspect_ratio = 1.0;
+    double vfov = pi/2;
     int image_width = 100;
     int samples_per_pixel = 10;
     int max_depth = 10;
+    point3 center = point3(0, 0, 0);
+    point3 lookat = point3(0, 0, -1);
+    vec3 up = vec3(0, 1, 0);
 
     void render(const hittable& world) {
         initialize();
@@ -29,25 +34,26 @@ class camera {
 
   private:
     int image_height;
-    point3 center;
     point3 pixel00_loc;
     vec3 pixel_delta_u;
     vec3 pixel_delta_v;
 
     void initialize() {
         image_height = int(ceil(image_width / aspect_ratio));
-        center = point3(0, 0, 0);
 
-        double focal_length = 1.0;
-        double viewport_height = 2.0;
+        double viewport_height = 2.0 * std::tan(vfov/2);
         double viewport_width = viewport_height * image_width / image_height;
 
-        auto viewport_u = vec3(viewport_width, 0, 0);
-        auto viewport_v = vec3(0, -viewport_height, 0);
+        vec3 W = unit_vector(center - lookat); // back
+        vec3 U = unit_vector(cross(up, W));    // right
+        vec3 V = cross(W, U);                  // up
+
+        auto viewport_u = viewport_width * U;
+        auto viewport_v = -viewport_height * V;
         pixel_delta_u = viewport_u / image_width;
         pixel_delta_v = viewport_v / image_height;
 
-        auto viewport_upper_left = center - vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
+        auto viewport_upper_left = center - W - viewport_u/2 - viewport_v/2;
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
@@ -68,8 +74,11 @@ class camera {
 
         hit_record rec;
         if(world.hit(r, interval(0.001, infinity), rec)) {
-            vec3 direction = rec.normal + random_unit_vector();
-            return 0.5 * ray_color(ray(rec.p, direction), depth - 1, world);
+            ray scattered;
+            color attenuation;
+            if(rec.mat->scatter(r, rec, attenuation, scattered))
+                return attenuation * ray_color(scattered, depth - 1, world);
+            return color(0, 0, 0);
         }
         else {
             vec3 unit_direction = unit_vector(r.direction());

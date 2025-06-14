@@ -8,6 +8,7 @@ class camera {
   public:
     double aspect_ratio = 1.0;
     int image_width = 100;
+    int samples_per_pixel = 10;
 
     void render(const hittable& world) {
         initialize();
@@ -15,10 +16,12 @@ class camera {
         std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
         for(int j = 0; j < image_height; j++) {
             for(int i = 0; i < image_width; i++) {
-                auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
-                auto ray_direction = pixel_center - center;
-                auto r = ray(center, ray_direction);
-                write_color(std::cout, ray_color(r, world));
+                color pixel_color(0, 0, 0);
+                for(int sample = 0; sample < samples_per_pixel; sample++) {
+                    ray r = get_ray(i, j);
+                    pixel_color += ray_color(r, world);
+                }
+                write_color(std::cout, pixel_color / samples_per_pixel);
             }
         }
     }
@@ -45,6 +48,17 @@ class camera {
 
         auto viewport_upper_left = center - vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+    }
+
+    ray get_ray(int i, int j) const {
+        vec3 offset = sample_square();
+        point3 pixel_sample = pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
+        return ray(center, pixel_sample - center);
+    }
+
+    // Return a random vector in the unit square [-0.5, +0.5] x [-0.5, +0.5].
+    vec3 sample_square() const {
+        return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
     color ray_color(const ray& r, const hittable& world) const {

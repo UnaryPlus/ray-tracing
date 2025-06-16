@@ -10,6 +10,9 @@ using std::make_shared;
 using std::shared_ptr;
 
 class hittable_list : public hittable {
+  private:
+    box bbox;
+
   public:
     std::vector<shared_ptr<hittable>> objects;
 
@@ -20,6 +23,7 @@ class hittable_list : public hittable {
 
     void add(shared_ptr<hittable> object) {
         objects.push_back(object);
+        bbox = box(bbox, object->bounding_box());
     }
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
@@ -37,6 +41,8 @@ class hittable_list : public hittable {
 
         return hit_anything;
     }
+
+    box bounding_box() const override { return bbox; }
 };
 
 #endif

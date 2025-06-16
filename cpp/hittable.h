@@ -3,6 +3,7 @@
 
 #include "ray.h"
 #include "interval.h"
+#include "box.h"
 
 using std::shared_ptr;
 
@@ -30,6 +31,8 @@ class hittable {
     virtual ~hittable() = default;
 
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+
+    virtual box bounding_box() const = 0;
 };
 
 #endif

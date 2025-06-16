@@ -9,22 +9,31 @@ using std::shared_ptr;
 
 class sphere : public hittable {
   private:
+    point3 center0;
     point3 center1;
-    point3 center2;
     double radius;
     shared_ptr<material> mat;
+    box bbox;
 
   public:
     // Moving sphere
-    sphere(const point3& center1, const point3& center2, double radius, shared_ptr<material> mat)
-        : center1(center1), center2(center2), radius(std::fmax(0,radius)), mat(mat) {}
+    sphere(const point3& center0, const point3& center1, double radius, shared_ptr<material> mat)
+        : center0(center0), center1(center1), radius(radius), mat(mat) {
+        auto rvec = vec3(radius, radius, radius);
+        box box0(center0 - rvec, center0 + rvec);
+        box box1(center1 - rvec, center1 + rvec);
+        bbox = box(box0, box1);
+    }
 
     // Stationary sphere
     sphere(const point3& center, double radius, shared_ptr<material> mat) 
-        : sphere(center, center, radius, mat) {}
+        : center0(center), center1(center), radius(radius), mat(mat) {
+        auto rvec = vec3(radius, radius, radius);
+        bbox = box(center - rvec, center + rvec);
+    }
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-        point3 center = center1 + r.time() * (center2 - center1);
+        point3 center = center0 + r.time() * (center1 - center0);
         vec3 oc = center - r.origin();
         double a = r.direction().length_squared();
         double h = dot(r.direction(), oc);
@@ -52,6 +61,8 @@ class sphere : public hittable {
 
         return true;
     }
+
+    box bounding_box() const override { return bbox; }
 };
 
 #endif

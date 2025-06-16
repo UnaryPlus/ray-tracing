@@ -9,15 +9,22 @@ using std::shared_ptr;
 
 class sphere : public hittable {
   private:
-    point3 center;
+    point3 center1;
+    point3 center2;
     double radius;
     shared_ptr<material> mat;
 
   public:
+    // Moving sphere
+    sphere(const point3& center1, const point3& center2, double radius, shared_ptr<material> mat)
+        : center1(center1), center2(center2), radius(std::fmax(0,radius)), mat(mat) {}
+
+    // Stationary sphere
     sphere(const point3& center, double radius, shared_ptr<material> mat) 
-        : center(center), radius(std::fmax(0,radius)), mat(mat) {}
+        : sphere(center, center, radius, mat) {}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        point3 center = center1 + r.time() * (center2 - center1);
         vec3 oc = center - r.origin();
         double a = r.direction().length_squared();
         double h = dot(r.direction(), oc);

@@ -73,7 +73,7 @@ class camera {
         vec3 offset = sample_square();
         point3 pixel_sample = pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
         point3 ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();        
-        return ray(ray_origin, pixel_sample - ray_origin);
+        return ray(ray_origin, pixel_sample - ray_origin, random_double());
     }
 
     // Return a random vector in the unit square [-0.5, +0.5] x [-0.5, +0.5].

@@ -42,12 +42,13 @@ class constant_medium : public hittable {
         if(hit_distance > distance_inside_boundary)
             return false;
         
-        rec.t = hit_distance / ray_scale;
+        rec.t = t0 + hit_distance / ray_scale;
         rec.p = r.at(rec.t);
         rec.mat = iso_mat;
         rec.u = rec1.u;
         rec.v = rec1.v;
         // normal and front_face are not used by isotropic material
+        return true;
     }
 
     box bounding_box() const override { return boundary->bounding_box(); }

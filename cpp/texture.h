@@ -4,6 +4,7 @@
 #include "vec3.h"
 #include "color.h"
 #include "image.h"
+#include "perlin_noise.h"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -62,6 +63,19 @@ class image_texture : public texture {
         int i = int(u * img.width());
         int j = int((1 - v) * img.height());
         return img.pixel_color(u * img.width(), (1 - v) * img.height());
+    }
+};
+
+class noise_texture : public texture {
+  private:
+    perlin_noise noise;
+    double frequency;
+
+  public:
+    noise_texture(double frequency) : frequency(frequency) {}
+    
+    color value(double u, double v, const point3& p) const override {
+        return color(1, 1, 1) * (0.5 + 0.5 * std::sin(frequency * p.z() + 10 * std::fabs(noise.turbulence(p, 7))));
     }
 };
 

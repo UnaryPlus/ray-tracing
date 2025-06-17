@@ -12,13 +12,16 @@ class box {
     box() {} // Empty
 
     box(const interval& x, const interval& y, const interval& z)
-        : x(x), y(y), z(z) {}
+        : x(x), y(y), z(z) {
+        pad_to_minimum();
+    }
 
     box(const point3& a, const point3& b)
-        : x((a[0] <= b[0]) ? interval(a[0], b[0]) : interval(b[0], a[0]))
-        , y((a[1] <= b[1]) ? interval(a[1], b[1]) : interval(b[1], a[1]))
-        , z((a[2] <= b[2]) ? interval(a[2], b[2]) : interval(b[2], a[2]))
-        {}
+        : x(std::fmin(a[0], b[0]), std::fmax(a[0], b[0]))
+        , y(std::fmin(a[1], b[1]), std::fmax(a[1], b[1]))
+        , z(std::fmin(a[2], b[2]), std::fmax(a[2], b[2])) {
+        pad_to_minimum();
+    }
 
     box(const box& box0, const box& box1)
         : x(box0.x, box1.x)
@@ -58,9 +61,25 @@ class box {
     } 
 
     static const box empty, universe;
+
+  private:
+    void pad_to_minimum() {
+        double delta = 0.0001;
+        if(x.size() < delta) x = x.with_size(delta);
+        if(y.size() < delta) y = y.with_size(delta);
+        if(z.size() < delta) z = z.with_size(delta);
+    }
 };
 
 const box box::empty = box(interval::empty, interval::empty, interval::empty);
 const box box::universe = box(interval::universe, interval::universe, interval::universe);
+
+box operator+(const box& bbox, const vec3& offset) {
+    return box(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+}
+
+box operator+(const vec3& offset, const box& bbox) {
+    return bbox + offset;
+}
 
 #endif

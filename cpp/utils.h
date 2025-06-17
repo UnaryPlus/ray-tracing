@@ -25,4 +25,11 @@ inline int random_int(int min, int max) {
     return int(random_double(min, max+1));
 }
 
+void random_shuffle(int* p, int n) {
+    for(int i = n - 1; i > 0; i--) {
+        int target = random_int(0, i);
+        std::swap(p[i], p[target]);
+    }
+}
+
 #endif

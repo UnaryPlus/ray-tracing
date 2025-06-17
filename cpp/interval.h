@@ -32,10 +32,24 @@ class interval {
         return (x < min) ? min : (x > max) ? max : x;
     }
 
-    static const interval empty, universe;
+    interval with_size(double delta) const {
+        double avg = (min + max) / 2;
+        return interval(avg - delta/2, avg + delta/2);
+    }
+
+    static const interval empty, unit, universe;
 };
 
 const interval interval::empty = interval(+infinity, -infinity);
+const interval interval::unit = interval(0, 1);
 const interval interval::universe = interval(-infinity, +infinity);
+
+interval operator+(const interval& ival, double displacement) {
+    return interval(ival.min + displacement, ival.max + displacement);
+}
+
+interval operator+(double displacement, const interval& ival) {
+    return ival + displacement;
+}
 
 #endif

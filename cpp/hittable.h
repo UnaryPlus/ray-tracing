@@ -37,4 +37,84 @@ class hittable {
     virtual box bounding_box() const = 0;
 };
 
+class translate : public hittable {
+  private:
+    shared_ptr<hittable> object;
+    vec3 offset;
+    box bbox;
+
+  public:
+    translate(shared_ptr<hittable> object, const vec3& offset) 
+        : object(object), offset(offset) {
+        bbox = object->bounding_box() + offset;
+    }
+
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        ray offset_r = ray(r.origin() - offset, r.direction(), r.time());
+        if(object->hit(offset_r, ray_t, rec)) {
+            rec.p += offset;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    box bounding_box() const override { return bbox; }
+};
+
+class rotate_y : public hittable {
+  private:
+    shared_ptr<hittable> object;
+    double cos_theta;
+    double sin_theta;
+    box bbox;
+
+  public:
+    rotate_y(shared_ptr<hittable> object, double theta) 
+        : object(object), cos_theta(std::cos(theta)), sin_theta(std::sin(theta)) {
+
+        box original_bbox = object->bounding_box();
+        point3 min(+infinity, bbox.y.min, +infinity);
+        point3 max(-infinity, bbox.y.max, -infinity);
+
+        for(int i = 0; i < 2; i++) {
+            for(int k = 0; k < 2; k++) {
+                point3 corner(i ? bbox.x.max : bbox.x.min, 0, k ? bbox.z.max : bbox.z.min);
+                point3 test = rotate_pos(corner);
+
+                for(int j = 0; j <= 2; j+= 2) {
+                    min[j] = std::min(min[j], test[j]);
+                    max[j] = std::max(max[j], test[j]);
+                }
+            }
+        }
+
+        bbox = box(min, max);
+    }
+
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        ray rotated_r = ray(rotate_neg(r.origin()), rotate_neg(r.direction()), r.time());
+        if(object->hit(rotated_r, ray_t, rec)) {
+            rec.p = rotate_pos(rec.p);
+            rec.normal = rotate_pos(rec.normal);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    box bounding_box() const override { return bbox; }
+
+  private:
+    vec3 rotate_neg(const vec3& v) const {
+        return vec3(cos_theta * v.x() - sin_theta * v.z(), v.y(), sin_theta * v.x() + cos_theta * v.z());
+    }
+
+    vec3 rotate_pos(const vec3& v) const {
+        return vec3(cos_theta * v.x() + sin_theta * v.z(), v.y(), -sin_theta * v.x() + cos_theta * v.z());
+    }
+};
+
 #endif

@@ -32,13 +32,14 @@ class camera {
                     ray r = get_ray(i, j);
                     pixel_color += ray_color(r, max_depth, world);
                 }
-                write_color(std::cout, pixel_color / samples_per_pixel);
+                write_color(std::cout, pixel_color * pixel_samples_scale);
             }
         }
     }
 
   private:
     int image_height;
+    double pixel_samples_scale;
     point3 pixel00_loc;
     vec3 pixel_delta_u;
     vec3 pixel_delta_v;
@@ -46,7 +47,8 @@ class camera {
     vec3 defocus_disk_v;
 
     void initialize() {
-        image_height = int(ceil(image_width / aspect_ratio));
+        image_height = int(std::ceil(image_width / aspect_ratio));
+        pixel_samples_scale = 1.0 / samples_per_pixel;
 
         double h = std::tan(vfov/2);
         double viewport_height = 2.0 * h * focus_dist;

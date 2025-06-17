@@ -8,12 +8,13 @@
 #include "camera.h"
 #include "material.h"
 #include "bvh_node.h"
+#include "texture.h"
 #include <iostream>
 
-int main() {
+void bouncing_spheres() {
     hittable_list spheres;
-    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    spheres.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
+    auto checker = make_shared<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+    spheres.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
 
     // little spheres
     for(int a = -11; a < 11; a++) {
@@ -52,8 +53,6 @@ int main() {
     spheres.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
     spheres.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
-    auto world = bvh_node(spheres);
-
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
@@ -68,5 +67,58 @@ int main() {
     cam.defocus_angle = degrees(0.6);
     cam.focus_dist = 10.0;
 
+    auto world = bvh_node(spheres);
     cam.render(world);
+}
+
+void checkered_spheres() {
+    hittable_list world;
+    auto checker_tex = make_shared<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+    auto checker_mat = make_shared<lambertian>(checker_tex);
+    world.add(make_shared<sphere>(point3(0, -10, 0), 10, checker_mat)); 
+    world.add(make_shared<sphere>(point3(0, +10, 0), 10, checker_mat));
+
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+
+    cam.vfov = degrees(20);
+    cam.center = point3(13, 2, 3);
+    cam.lookat = point3(0, 0, 0);
+    cam.up = vec3(0, 1, 0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+}
+
+void earth() {
+    auto earth_tex = make_shared<image_texture>("images/earthmap.jpg");
+    auto earth_mat = make_shared<lambertian>(earth_tex);
+    auto globe = sphere(point3(0, 0, 0), 2, earth_mat);
+
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+
+    cam.vfov = degrees(20);
+    cam.center = point3(0,0,12);
+    cam.lookat = point3(0,0,0);
+    cam.up = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(globe);
+}
+
+int main() {
+    switch(3) {
+        case 1: bouncing_spheres(); break;
+        case 2: checkered_spheres(); break;
+        case 3: earth(); break;
+    }
 }

@@ -74,7 +74,7 @@ class rotate_y : public hittable {
     rotate_y(shared_ptr<hittable> object, double theta) 
         : object(object), cos_theta(std::cos(theta)), sin_theta(std::sin(theta)) {
 
-        box original_bbox = object->bounding_box();
+        bbox = object->bounding_box();
         point3 min(+infinity, bbox.y.min, +infinity);
         point3 max(-infinity, bbox.y.max, -infinity);
 
@@ -83,7 +83,7 @@ class rotate_y : public hittable {
                 point3 corner(i ? bbox.x.max : bbox.x.min, 0, k ? bbox.z.max : bbox.z.min);
                 point3 test = rotate_pos(corner);
 
-                for(int j = 0; j <= 2; j+= 2) {
+                for(int j = 0; j <= 2; j += 2) {
                     min[j] = std::min(min[j], test[j]);
                     max[j] = std::max(max[j], test[j]);
                 }

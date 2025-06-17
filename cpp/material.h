@@ -27,8 +27,9 @@ class lambertian : public material {
     lambertian(shared_ptr<texture> tex) : tex(tex) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
-        auto scatter_direction = rec.normal + random_unit_vector();
-        if(scatter_direction.near_zero()) scatter_direction = rec.normal;
+        vec3 scatter_direction;
+        do scatter_direction = rec.normal + random_unit_vector();
+        while(scatter_direction.near_zero());
         scattered = ray(rec.p, scatter_direction, r_in.time());
         attenuation = tex->value(rec.u, rec.v, rec.p);
         return true;
@@ -93,6 +94,21 @@ class diffuse_light : public material {
   
     color emitted(const ray& r_in, const hit_record& rec) const override {
         return tex->value(rec.u, rec.v, rec.p);
+    }
+};
+
+class isotropic : public material {
+  private:
+    shared_ptr<texture> tex;
+
+  public:
+    isotropic(const color& albedo) : tex(make_shared<solid_color>(albedo)) {}
+    isotropic(shared_ptr<texture> tex) : tex(tex) {}
+
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
+        scattered = ray(rec.p, random_unit_vector(), r_in.time());
+        attenuation = tex->value(rec.u, rec.v, rec.p);
+        return true;
     }
 };
 

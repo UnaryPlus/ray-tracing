@@ -1,9 +1,16 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE DataKinds #-}
+
 module Main where
 
 import Linear (V2, V3(V3), dot, quadrance, (^*), (*^), (^/))
-import Control.Monad (forM_, guard)
-import Debug.Trace
+import Data.Massiv.Array
+import Data.Massiv.Array.IO (Image, writeImage)
+import Graphics.Color.Space.RGB (SRGB, Linearity(NonLinear))
+import qualified Graphics.Pixel.ColorSpace as C
+
+import Control.Monad (guard)
+import Data.Word (Word8)
 
 type Vec3 = V3 Double
 type Point3 = V3 Double
@@ -69,7 +76,10 @@ geometryObject :: Geometry -> Material -> SceneObject
 geometryObject (Geometry f) mat = SceneObject $ 
   \r i -> fmap (, mat) (f r i)
 
-raytracingTest :: Geometry -> (Int, Int) -> Double -> IO ()
+makePixel :: Color -> C.Pixel (SRGB 'NonLinear) Word8
+makePixel (V3 r g b) = C.toPixel8 (C.Pixel (C.ecctf (C.ColorSRGB r g b)))
+
+raytracingTest :: Geometry -> (Int, Int) -> Double -> Image S (SRGB 'NonLinear) Word8
 raytracingTest (Geometry hitObj) (w, h) vfov = let
   cameraCenter = V3 0 0 1
   viewportHeight = tan (vfov / 2) * 2
@@ -78,16 +88,12 @@ raytracingTest (Geometry hitObj) (w, h) vfov = let
   pixel_dx = V3 (viewportWidth / fromIntegral w) 0 0
   pixel_dy = V3 0 (-(viewportHeight / fromIntegral h)) 0
   pixel00 = topLeft + pixel_dx ^/ 2 + pixel_dy ^/ 2
-  getRay i j = Ray cameraCenter (pixel00 + pixel_dx ^* fromIntegral i + pixel_dy ^* fromIntegral j - cameraCenter) 
-  in do
-  putStrLn "P3"
-  putStrLn (show w ++ " " ++ show h)
-  putStrLn "255"
-  forM_ [0..h-1] $ \j ->
-    forM_ [0..w-1] $ \i ->
-      case hitObj (getRay i j) (0, 1000000000) of
-        Nothing -> putStrLn "0 0 0"
-        Just _ -> putStrLn "255 255 255"
+  getRay i j = Ray cameraCenter (pixel00 + pixel_dx ^* fromIntegral i + pixel_dy ^* fromIntegral j - cameraCenter)
+  pixelColor i j = 
+    case hitObj (getRay i j) (0, 1000000000) of 
+      Nothing -> V3 0 0 0
+      Just _ -> V3 1 1 1
+  in makeArray Par (Sz (h :. w)) (\(j :. i) -> makePixel (pixelColor i j))
 
 main :: IO ()
-main = raytracingTest (sphere (V3 0 0 0) 0.2) (120, 100) (pi / 2)
+main = writeImage "test_image.png" $ raytracingTest (sphere (V3 0 0 0) 0.2) (120, 100) (pi / 2)

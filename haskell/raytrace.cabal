@@ -67,7 +67,7 @@ executable raytrace
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.17.2.1, linear
+    build-depends:    base ^>=4.17.2.1, linear, massiv, massiv-io, Color
 
     -- Directories containing source files.
     hs-source-dirs:   app

@@ -60,9 +60,11 @@ class image_texture : public texture {
     image_texture(const char* filepath) : img(filepath) {}
     
     color value(double u, double v, const point3& p) const override {
-        int i = int(u * img.width());
-        int j = int((1 - v) * img.height());
-        return img.pixel_color(u * img.width(), (1 - v) * img.height());
+        double uf = u - std::floor(u); // [0, 1)
+        double vf = std::ceil(v) - v;  // [0, 1)
+        int i = int(uf * img.width());
+        int j = int(vf * img.height());
+        return img.pixel_color(i, j);
     }
 };
 

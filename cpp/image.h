@@ -35,8 +35,6 @@ class image {
         if(fdata == nullptr)
             return color(1, 0, 1);
         
-        x = x % image_width;
-        y = y % image_height;
         int i = (y * image_width + x) * 3;
         return color(fdata[i], fdata[i+1], fdata[i+2]);
     }

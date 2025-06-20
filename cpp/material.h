@@ -57,8 +57,8 @@ class dielectric : public material {
   private:
     double refraction_index;
 
-    double reflectance(double cosine) const {
-        double r0 = (1 - refraction_index) / (1 + refraction_index);
+    static double reflectance(double cosine, double ri) {
+        double r0 = (1 - ri) / (1 + ri);
         r0 = r0*r0;
         return r0 + (1 - r0)*std::pow((1 - cosine), 5);
     }
@@ -75,7 +75,7 @@ class dielectric : public material {
         double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
 
         vec3 direction = 
-            (ri * sin_theta > 1.0 || random_double() < reflectance(cos_theta))
+            (ri * sin_theta > 1.0 || random_double() < reflectance(cos_theta, ri))
             ? reflect(unit_direction, rec.normal)
             : refract(unit_direction, rec.normal, ri);
 

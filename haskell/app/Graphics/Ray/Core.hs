@@ -21,7 +21,7 @@ reflect normal v =
 
 randomUnitVector :: (RandomGen g, MonadState g m) => m Vec3
 randomUnitVector = do
-  vec <- V3 <$> state (randomR (-1, 1)) <*> state (randomR (-1, 1)) <*> state (randomR (-1, 1))
+  vec <- state (randomR (-1, 1))
   let q = quadrance vec
   if 1e-8 <= q && q <= 1
     then pure (vec ^/ sqrt q)
@@ -29,7 +29,7 @@ randomUnitVector = do
 
 randomInUnitDisk :: (RandomGen g, MonadState g m) => m (V2 Double)
 randomInUnitDisk = do
-  vec <- V2 <$> state (randomR (-1, 1)) <*> state (randomR (-1, 1))
+  vec <- state (randomR (-1, 1))
   if quadrance vec <= 1
     then pure vec
     else randomInUnitDisk
@@ -42,3 +42,7 @@ type Interval = (Double, Double)
 inInterval :: Interval -> Double -> Bool
 inInterval (tmin, tmax) t = tmin < t && t < tmax
 
+type Box = V3 Interval
+
+hitsBox :: Box -> Ray -> Interval -> Bool
+hitsBox = undefined

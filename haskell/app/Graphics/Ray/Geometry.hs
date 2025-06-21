@@ -16,11 +16,14 @@ data HitRecord = HitRecord
   , hr_uv :: V2 Double
   }
 
-newtype Geometry = Geometry (Ray -> Interval -> Maybe HitRecord)
+data Geometry = Geometry Box (Ray -> Interval -> Maybe HitRecord)
 
 sphere :: Point3 -> Double -> Geometry
-sphere center radius = Geometry $
-  \(Ray orig dir) bounds -> do
+sphere center radius = let
+  diag = V3 radius radius radius
+  bbox = fromCorners (center - diag) (center + diag)
+  in 
+  Geometry bbox $ \(Ray orig dir) bounds -> do
     let oc = center - orig
     let a = quadrance dir
     let h = dot dir oc 

@@ -1,8 +1,11 @@
 module Graphics.Ray.Core where
 
-import Linear (V2(V2), V3(V3), dot, quadrance, (*^), (^/))
+import Linear (V2, V3(V3), dot, quadrance, (*^), (^/))
 import System.Random (RandomGen, randomR)
 import Control.Monad.State (MonadState, state)
+import Control.Applicative (liftA2)
+import Data.Maybe (isJust)
+import Data.Foldable (foldl')
 
 infinity :: Double
 infinity = 1/0
@@ -42,7 +45,35 @@ type Interval = (Double, Double)
 inInterval :: Interval -> Double -> Bool
 inInterval (tmin, tmax) t = tmin < t && t < tmax
 
+-- private
+isect :: Interval -> Interval -> Maybe Interval
+isect (a, b) (c, d) = let
+  imin = max a c
+  imax = min b d
+  in if imin > imax then Nothing else Just (imin, imax)
+
+-- private
+-- TODO: edge cases
+hitsInterval :: Interval -> Double -> Double -> Interval
+hitsInterval (tmin, tmax) x d = let
+  t0 = (tmin - x) / d
+  t1 = (tmax - x) / d
+  in if t0 < t1 then (t0, t1) else (t1, t0)
+
 type Box = V3 Interval
 
 hitsBox :: Box -> Ray -> Interval -> Bool
-hitsBox = undefined
+hitsBox (V3 ix iy iz) (Ray (V3 ox oy oz) (V3 dx dy dz)) (tmin, tmax) =
+  isJust $ do
+    (tmin', tmax') <- isect (tmin, tmax) (hitsInterval ix ox dx)
+    (tmin'', tmax'') <- isect (tmin', tmax') (hitsInterval iy oy dy)
+    isect (tmin'', tmax'') (hitsInterval iz oz dz)
+
+fromCorners :: Point3 -> Point3 -> Box
+fromCorners = liftA2 (\x y -> if x < y then (x, y) else (y, x))
+
+boxJoin :: Box -> Box -> Box
+boxJoin = liftA2 (\(min1, max1) (min2, max2) -> (min min1 min2, max max1 max2))
+
+boxHull :: [Box] -> Box
+boxHull = foldl' boxJoin (V3 (infinity, -infinity) (infinity, -infinity) (infinity, -infinity))

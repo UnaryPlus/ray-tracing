@@ -48,7 +48,7 @@ defaultCameraSettings = CameraSettings
   }
 
 raytrace :: CameraSettings -> SceneObject -> StdGen -> A.Matrix D Color
-raytrace (CameraSettings {..}) (SceneObject hitWorld) seed = let
+raytrace (CameraSettings {..}) (SceneObject _ hitWorld) seed = let
   imageHeight = ceiling (fromIntegral cs_imageWidth / cs_aspectRatio)
   viewportHeight = cs_focusDist * tan (cs_vfov / 2) * 2
   viewportWidth = viewportHeight * fromIntegral cs_imageWidth / fromIntegral imageHeight

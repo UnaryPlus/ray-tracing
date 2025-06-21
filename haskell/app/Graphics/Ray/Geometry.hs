@@ -22,8 +22,8 @@ sphere :: Point3 -> Double -> Geometry
 sphere center radius = let
   diag = V3 radius radius radius
   bbox = fromCorners (center - diag) (center + diag)
-  in 
-  Geometry bbox $ \(Ray orig dir) bounds -> do
+
+  hitSphere (Ray orig dir) bounds = do
     let oc = center - orig
     let a = quadrance dir
     let h = dot dir oc 
@@ -53,6 +53,8 @@ sphere center radius = let
       , hr_frontFace = frontFace
       , hr_uv = sphereUV outwardNormal
       }
+  
+  in Geometry bbox hitSphere
 
 -- With default camera settings (-z direction is forward, +y direction is up),
 -- texture images will be wrapped around the sphere starting and ending on the

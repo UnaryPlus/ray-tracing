@@ -14,6 +14,7 @@ data SceneObject = SceneObject Box (Ray -> Interval -> Maybe (HitRecord, Materia
 boundingBox :: SceneObject -> Box
 boundingBox (SceneObject b _) = b
 
+-- TODO: change name
 geometryObject :: Material -> Geometry -> SceneObject
 geometryObject mat (Geometry bbox f) = 
   SceneObject bbox (\r i -> fmap (, mat) (f r i))

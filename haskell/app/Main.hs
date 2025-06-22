@@ -55,6 +55,29 @@ metalTest = let
   seed <- newStdGen
   writeImageRTW "test_image.png" $ raytrace settings world seed
 
+checkerTest :: IO ()
+checkerTest = let
+  checker = lambertian (checkerTexture 0.32 (V3 0.2 0.3 0.1) (V3 0.9 0.9 0.9))
+
+  world = group
+    [ geometryObject checker (sphere (V3 0 (-10) 0) 10)
+    , geometryObject checker (sphere (V3 0 10 0) 10)
+    ]
+  
+  settings = defaultCameraSettings
+    { cs_aspectRatio = 16 / 9
+    , cs_imageWidth = 400
+    , cs_samplesPerPixel = 100
+    , cs_maxRecursionDepth = 50
+    , cs_vfov = degrees 20
+    , cs_center = V3 13 2 3
+    , cs_lookAt = V3 0 0 0
+    }
+
+  in do
+  seed <- newStdGen
+  writeImageRTW "test_image.png" $ raytrace settings world seed
+
 demo1 :: IO ()
 demo1 = let
   materialGround = lambertian (constantTexture (V3 0.5 0.5 0.5))
@@ -92,7 +115,7 @@ demo1 = let
   settings = defaultCameraSettings
     { cs_aspectRatio = 16 / 9
     , cs_imageWidth = 1200
-    , cs_samplesPerPixel = 10 -- 500
+    , cs_samplesPerPixel = 500
     , cs_maxRecursionDepth = 50
     , cs_vfov = degrees 20
     , cs_center = V3 13 2 3

@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Graphics.Ray.Texture 
   ( Texture(Texture)
-  , constantTexture, solidTexture, uvTexture, imageTexture
+  , constantTexture, solidTexture, checkerTexture, uvTexture, imageTexture
   ) where
 
 import Graphics.Ray.Core
@@ -17,6 +17,13 @@ constantTexture color = Texture (\_ _ -> color)
 
 solidTexture :: (Point3 -> Color) -> Texture
 solidTexture f = Texture (\p _ -> f p)
+
+checkerTexture :: Double -> Color -> Color -> Texture
+checkerTexture scale c1 c2 =
+  let invScale = 1 / scale in
+  solidTexture $ \p ->
+    let ns = fmap floor (p ^* invScale) :: V3 Int in
+    if even (sum ns) then c1 else c2
 
 uvTexture :: (V2 Double -> Color) -> Texture
 uvTexture f = Texture (const f)

@@ -1,6 +1,6 @@
 module Graphics.Ray.Geometry
   ( HitRecord(..), Geometry(Geometry)
-  , sphere, sphereUV
+  , sphere
   ) where
 
 import Graphics.Ray.Core
@@ -64,4 +64,3 @@ sphereUV (V3 x y z) = V2 u v
   where
     u = atan2 x z / (2 * pi) + 0.5
     v = acos (-y) / pi 
-

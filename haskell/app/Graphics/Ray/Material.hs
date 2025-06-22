@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Graphics.Ray.Material 
   ( Material(Material)
-  , lightSource, lambertian, mirror, metal, dielectric
+  , lightSource, lambertian, mirror, metal, dielectric, thinPane
   ) where
 
 import Graphics.Ray.Core
@@ -64,3 +64,8 @@ dielectric ior = Material $
           else refract iorRatio cosTheta hr_normal u
     
     pure (zero, Just (V3 1 1 1, Ray hr_point dir'))    
+
+thinPane :: Texture -> Material
+thinPane (Texture tex) = Material $
+  \(Ray _ dir) (HitRecord {..}) ->
+    pure (zero, Just (tex hr_point hr_uv, Ray hr_point dir))

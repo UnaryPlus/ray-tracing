@@ -31,11 +31,11 @@ metalTest = let
   materialRight = metal 1.0 (constantTexture (V3 0.8 0.6 0.2))
 
   world = group 
-    [ geometryObject (sphere (V3 0 (-100.5) (-1)) 100) materialGround
-    , geometryObject (sphere (V3 0 0 (-1.2)) 0.5) materialCenter
-    , geometryObject (sphere (V3 (-1) 0 (-1)) 0.5) materialLeft
-    , geometryObject (sphere (V3 (-1) 0 (-1)) 0.4) materialBubble
-    , geometryObject (sphere (V3 1 0 (-1)) 0.5) materialRight
+    [ geometryObject materialGround (sphere (V3 0 (-100.5) (-1)) 100)
+    , geometryObject materialCenter (sphere (V3 0 0 (-1.2)) 0.5) 
+    , geometryObject materialLeft (sphere (V3 (-1) 0 (-1)) 0.5) 
+    , geometryObject materialBubble (sphere (V3 (-1) 0 (-1)) 0.4) 
+    , geometryObject materialRight (sphere (V3 1 0 (-1)) 0.5) 
     ]
 
   settings = defaultCameraSettings 
@@ -63,10 +63,10 @@ demo1 = let
   materialMirror = mirror (constantTexture (V3 0.7 0.6 0.5))
 
   bigSpheres =
-    [ geometryObject (sphere (V3 0 (-1000) 0) 1000) materialGround
-    , geometryObject (sphere (V3 0 1 0) 1) materialGlass
-    , geometryObject (sphere (V3 (-4) 1 0) 1) materialDiffuse
-    , geometryObject (sphere (V3 4 1 0) 1) materialMirror
+    [ geometryObject materialGround (sphere (V3 0 (-1000) 0) 1000)
+    , geometryObject materialGlass (sphere (V3 0 1 0) 1)
+    , geometryObject materialDiffuse (sphere (V3 (-4) 1 0) 1)
+    , geometryObject materialMirror (sphere (V3 4 1 0) 1)
     ]
 
   genWorld :: State StdGen SceneObject
@@ -87,7 +87,7 @@ demo1 = let
             color <- state (randomR (0.5, 1))
             pure (metal fuzz (constantTexture color))
           else pure materialGlass
-        pure [ geometryObject (sphere center 0.2) mat ]
+        pure [ geometryObject mat (sphere center 0.2) ]
   
   settings = defaultCameraSettings
     { cs_aspectRatio = 16 / 9

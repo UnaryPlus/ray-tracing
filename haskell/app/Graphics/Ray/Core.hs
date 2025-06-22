@@ -17,6 +17,19 @@ type Vec3 = V3 Double
 type Point3 = V3 Double
 type Color = V3 Double
 
+data Dim = X | Y | Z
+  deriving (Eq, Ord, Enum)
+
+component :: Dim -> V3 a -> a
+component X (V3 x _ _) = x
+component Y (V3 _ y _) = y
+component Z (V3 _ _ z) = z
+
+argMax :: Ord a => V3 a -> Dim
+argMax (V3 x y z)
+  | x > y     = if x > z then X else Z
+  | otherwise = if y > z then Y else Z
+
 -- v need not be a unit vector
 reflect :: Vec3 -> Vec3 -> Vec3
 reflect normal v = 
@@ -41,6 +54,12 @@ data Ray = Ray Point3 Vec3
   deriving (Show)
 
 type Interval = (Double, Double)
+
+size :: Interval -> Double
+size (a, b) = b - a
+
+midpoint :: Interval -> Double
+midpoint (a, b) = (a + b) / 2
 
 inInterval :: Interval -> Double -> Bool
 inInterval (tmin, tmax) t = tmin < t && t < tmax
@@ -77,3 +96,6 @@ boxJoin = liftA2 (\(min1, max1) (min2, max2) -> (min min1 min2, max max1 max2))
 
 boxHull :: [Box] -> Box
 boxHull = foldl' boxJoin (V3 (infinity, -infinity) (infinity, -infinity) (infinity, -infinity))
+
+longestDim :: Box -> Dim
+longestDim = argMax . fmap size

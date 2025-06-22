@@ -71,7 +71,7 @@ demo1 = let
 
   genWorld :: State StdGen SceneObject
   genWorld = do
-    fmap (group . (bigSpheres ++) . concat) $ forM (liftA2 (,) [-11..10] [-11..10]) $ \(a, b) -> do
+    fmap (bvhTree . autoTree . (bigSpheres ++) . concat) $ forM (liftA2 (,) [-11..10] [-11..10]) $ \(a, b) -> do
       offsetX <- state (randomR (0, 0.9))
       offsetZ <- state (randomR (0, 0.9))
       let center = V3 (a + offsetX) 0.2 (b + offsetZ)
@@ -105,7 +105,7 @@ demo1 = let
   in do
   seed <- newStdGen
   let (world, seed') = runState genWorld seed
-  writeImageRTW "test_image.png" $ raytrace settings world seed'    
+  writeImageRTW "test_image.png" $ raytrace settings world seed'
 
 main :: IO ()
 main = demo1

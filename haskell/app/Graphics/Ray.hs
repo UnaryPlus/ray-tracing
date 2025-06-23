@@ -47,6 +47,7 @@ defaultCameraSettings = CameraSettings
   , cs_focusDist = 10.0
   }
 
+-- TODO: modify to return seed
 raytrace :: CameraSettings -> SceneObject -> StdGen -> A.Matrix D Color
 raytrace (CameraSettings {..}) (SceneObject _ hitWorld) seed = let
   imageHeight = ceiling (fromIntegral cs_imageWidth / cs_aspectRatio)

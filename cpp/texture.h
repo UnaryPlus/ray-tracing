@@ -77,7 +77,7 @@ class noise_texture : public texture {
     noise_texture(double frequency) : frequency(frequency) {}
     
     color value(double u, double v, const point3& p) const override {
-        return color(1, 1, 1) * (0.5 + 0.5 * std::sin(frequency * p.z() + 10 * std::fabs(noise.turbulence(p, 7))));
+        return color(1, 1, 1) * (0.5 + 0.5 * std::sin(frequency * p.z() + 10 * noise.turbulence(p, 7)));
     }
 };
 

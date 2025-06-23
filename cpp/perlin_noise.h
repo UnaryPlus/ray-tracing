@@ -59,7 +59,7 @@ class perlin_noise {
             temp_p *= 2;
         }
 
-        return accum;
+        return std::fabs(accum);
     }
   
   private:

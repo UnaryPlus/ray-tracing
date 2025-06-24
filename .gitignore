@@ -2,6 +2,3 @@ main
 image.ppm
 .vscode
 .DS_Store
-dist-newstyle
-test_image.ppm
-test_image.png
